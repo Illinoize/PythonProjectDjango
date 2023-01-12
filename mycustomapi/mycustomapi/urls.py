@@ -18,5 +18,5 @@ from django.urls import path, include  # pylint: disable=E0401
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('mycustomapi.wallets.urls')),
+    path('', include('wallets.urls')),
 ]
