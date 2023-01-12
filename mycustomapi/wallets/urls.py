@@ -5,7 +5,7 @@ from rest_framework.urlpatterns import format_suffix_patterns  # pylint: disable
 
 urlpatterns = [
     path('wallets/', views.WalletList.as_view()),
-    # path('wallets/name/', views.wallet_details),
+    path('wallets/name/', views.WalletName.as_view()),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

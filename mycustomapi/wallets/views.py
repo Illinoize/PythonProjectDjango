@@ -8,9 +8,7 @@ from wallets.serializers import WalletSerializer  # pylint: disable=E0401
 
 
 class WalletList(mixins.ListModelMixin,
-                 mixins.RetrieveModelMixin,
                  mixins.CreateModelMixin,
-                 mixins.DestroyModelMixin,
                  generics.GenericAPIView):
     """Creating views of wallets"""
     queryset = Wallet.objects.all()
@@ -24,10 +22,21 @@ class WalletList(mixins.ListModelMixin,
         """Create an object"""
         return self.create(request, *args, **kwargs)
 
-    def delete(self, request, *args, **kwargs):
-        """Delete an object"""
-        return self.destroy(request, *args, **kwargs)
 
+class WalletName(mixins.RetrieveModelMixin,
+                 mixins.DestroyModelMixin,
+                 generics.GenericAPIView):
+    """Working with wallets"""
+    queryset = Wallet.objects.all()
+    serializer_class = WalletSerializer
+
+    def get(self, request, *args, **kwargs):
+        """Get a wallet info"""
+        return self.retrieve(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        """Delete a wallet"""
+        return self.destroy(request, *args, **kwargs)
 
 # @api_view(['GET', 'POST', 'DELETE'])
 # def wallet_list(request):  # pylint: disable=R1710
