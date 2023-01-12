@@ -15,3 +15,4 @@ class WalletSerializer(serializers.ModelSerializer):  # pylint: disable=R0903
                   'balance',
                   'created_on',
                   'modified_on',)
+        read_only_fields = ('name', 'balance', 'created_on', 'modified_on',)

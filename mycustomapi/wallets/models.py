@@ -7,18 +7,18 @@ class Wallet(models.Model):  # pylint: disable=R0903
     """Creating Wallet model"""
     RANDOM_NAME = get_random_string(length=8)
     CARD_CHOICE = (
-        ('V', 'Visa'),
-        ('M', 'Mastercard'),
+        ('Visa', 'Visa'),
+        ('Mastercard', 'Mastercard'),
     )
     CURRENCY_CHOICE = (
-        ('U', 'USD'),
-        ('R', 'RUB'),
-        ('E', 'EUR'),
+        ('USD', 'USD'),
+        ('RUB', 'RUB'),
+        ('EUR', 'EUR'),
     )
 
     name = models.CharField(max_length=8, blank=False, default=RANDOM_NAME.upper())
-    type = models.CharField(choices=CARD_CHOICE, max_length=100, default='V')
-    currency = models.CharField(choices=CURRENCY_CHOICE, max_length=100, default='U')
-    balance = models.FloatField(max_length=100, blank=False, default=0.0)
-    created_on = models.DateTimeField(auto_now_add=True)
+    type = models.CharField(choices=CARD_CHOICE, max_length=100, default='Visa')
+    currency = models.CharField(choices=CURRENCY_CHOICE, max_length=100, default='USD')
+    balance = models.FloatField(max_length=100, blank=False, default=0.00)
+    created_on = models.DateTimeField(auto_now=True)
     modified_on = models.DateTimeField(auto_now_add=True)
