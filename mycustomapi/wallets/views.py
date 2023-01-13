@@ -6,24 +6,22 @@ from rest_framework import permissions  # pylint: disable=E0401
 from rest_framework.decorators import api_view  # pylint: disable=E0401
 from rest_framework.response import Response  # pylint: disable=E0401
 from rest_framework.reverse import reverse  # pylint: disable=E0401
-from django.contrib.auth.models import User  # pylint: disable=E0401
 from wallets.models import Wallet  # pylint: disable=E0401
-from wallets.serializers import WalletSerializer, UserSerializer  # pylint: disable=E0401
+from wallets.serializers import WalletSerializer  # pylint: disable=E0401
 from wallets.permissions import IsOwnerOrReadOnly  # pylint: disable=E0401
 
 
 @api_view(['GET'])
-def api_root(request):
-    """Creating root for urls"""
+def api_root(request, format=None):  # pylint: disable=W0622
+    """Getting one API point"""
     return Response({
-        'users': reverse('user-list', request=request, format=format),
         'wallets': reverse('wallet-list', request=request, format=format)
     })
 
 
-class WalletsList(mixins.ListModelMixin,
+class WalletsList(generics.GenericAPIView,
                   mixins.CreateModelMixin,
-                  generics.GenericAPIView):
+                  mixins.ListModelMixin,):
     """Creating views of wallets"""
     queryset = Wallet.objects.all()
     serializer_class = WalletSerializer
@@ -58,15 +56,3 @@ class WalletName(mixins.RetrieveModelMixin,
     def delete(self, request, *args, **kwargs):
         """Delete a wallet"""
         return self.destroy(request, *args, **kwargs)
-
-
-class UserList(generics.ListAPIView):  # pylint: disable=R0903
-    """Getting list of users"""
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-
-
-class UserDetail(generics.RetrieveAPIView):  # pylint: disable=R0903
-    """Getting info about user"""
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
