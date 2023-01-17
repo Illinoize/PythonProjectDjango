@@ -8,8 +8,8 @@ from rest_framework.response import Response  # pylint: disable=E0401
 from rest_framework.reverse import reverse  # pylint: disable=E0401
 from rest_framework.generics import CreateAPIView  # pylint: disable=E0401
 from django.contrib.auth.models import User  # pylint: disable=E0401
-from wallets.models import Wallet  # pylint: disable=E0401
-from wallets.serializers import WalletSerializer, UserSerializer  # pylint: disable=E0401
+from wallets.models import Wallet #, Transaction  # pylint: disable=E0401
+from wallets.serializers import WalletSerializer, UserSerializer #, TransactionSerializer  # pylint: disable=E0401
 from wallets.permissions import IsOwnerOrReadOnly  # pylint: disable=E0401
 
 
@@ -81,3 +81,27 @@ class CreateUserView(CreateAPIView):  # pylint: disable=R0903
         permissions.AllowAny
     ]
     serializer_class = UserSerializer
+
+
+# class CreateTransaction(generics.CreateAPIView):  # pylint: disable=R0903
+#     """Creating Transaction"""
+#     queryset = Transaction.objects.all()
+#     serializer_class = TransactionSerializer
+#
+#
+# class WalletTransaction(generics.ListAPIView):  # pylint: disable=R0903
+#     """Get a list where wallet is sender or receiver"""
+#     queryset = Transaction.objects.all()
+#     serializer_class = TransactionSerializer
+#
+#
+# class UserTransaction(generics.ListAPIView):  # pylint: disable=R0903
+#     """Get all transactions from user"""
+#     queryset = Transaction.objects.all()
+#     serializer_class = TransactionSerializer
+#
+#
+# class TransactionDetail(generics.RetrieveAPIView):  # pylint: disable=R0903
+#     """Get information about one transaction"""
+#     queryset = Transaction.objects.all()
+#     serializer_class = TransactionSerializer

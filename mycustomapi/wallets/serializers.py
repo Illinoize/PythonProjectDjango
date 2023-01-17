@@ -1,6 +1,6 @@
 """Importing model and serializers"""
 from rest_framework import serializers  # pylint: disable=E0401
-from wallets.models import Wallet  # pylint: disable=E0401
+from wallets.models import Wallet #, Transaction  # pylint: disable=E0401
 from django.contrib.auth.models import User  # pylint: disable=E0401
 from django.utils.crypto import get_random_string # pylint: disable=E0401
 
@@ -48,10 +48,22 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):  # pylint: disable
             username=validated_data['username'],
             password=validated_data['password'],
         )
-
         return user
 
     class Meta:  # pylint: disable=R0903
         """Create Meta class for User model"""
         model = User
         fields = ['url', 'id', 'username', 'password', 'wallets']
+
+
+# class TransactionSerializer(serializers.HyperlinkedModelSerializer):# pylint: disable=R0903
+#     """Creating serialization for transaction"""
+#     sender = serializers.HyperlinkedRelatedField(view_name='wallet-detail', read_only=True)
+#     receiver = serializers.HyperlinkedRelatedField(view_name='wallet-detail', read_only=True)
+#
+#     class Meta:  # pylint: disable=R0903
+#         """Creating Meta class for transactions"""
+#         model = Transaction
+#         fields = ('id', 'sender', 'receiver', 'transfer_amount',
+#         'commission', 'status', 'timestamp')
+#         read_only_fields = ('sender', 'commission', 'status', 'timestamp')

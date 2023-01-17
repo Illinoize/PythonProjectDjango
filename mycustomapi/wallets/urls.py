@@ -7,6 +7,12 @@ urlpatterns = [
     path('register/', views.CreateUserView.as_view(), name='register'),
     path('wallets/', views.WalletsList.as_view(), name='wallet-list'),
     path('wallets/<int:pk>/', views.WalletName.as_view(), name='wallet-detail'),
+    # path('wallets/transactions/', views.CreateTransaction.as_view(), name='transactions'),
+    # path('wallets/<int:pk>/transactions/',
+    # views.WalletTransaction.as_view(), name='wallet-transactions'),
+    # path('wallets/all-transactions/', views.UserTransaction.as_view(), name='user-transactions'),
+    # path('wallets/<int:pk>/transactions/<int:pk>/',
+    # views.TransactionDetail.as_view(), name='transaction-detail'),
     path('users/', views.UserList.as_view(), name='user-list'),
     path('users/<int:pk>/', views.UserDetail.as_view(), name='user-detail'),
 ]
