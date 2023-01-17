@@ -1,6 +1,6 @@
 """Importing model and serializers"""
 from rest_framework import serializers  # pylint: disable=E0401
-from wallets.models import Wallet #, Transaction  # pylint: disable=E0401
+from wallets.models import Wallet, Transaction  # pylint: disable=E0401
 from django.contrib.auth.models import User  # pylint: disable=E0401
 from django.utils.crypto import get_random_string # pylint: disable=E0401
 
@@ -23,7 +23,7 @@ class WalletSerializer(serializers.HyperlinkedModelSerializer):  # pylint: disab
     class Meta:  # pylint: disable=R0903
         """Create Meta class for model"""
         model = Wallet
-        fields = ('url',
+        fields = ['url',
                   'id',
                   'owner',
                   'name',
@@ -31,8 +31,7 @@ class WalletSerializer(serializers.HyperlinkedModelSerializer):  # pylint: disab
                   'currency',
                   'balance',
                   'created_on',
-                  'modified_on',)
-        write_only_fields = ('owner',)
+                  'modified_on',]
         read_only_fields = ('name', 'balance', 'created_on', 'modified_on',)
 
 
@@ -56,14 +55,34 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):  # pylint: disable
         fields = ['url', 'id', 'username', 'password', 'wallets']
 
 
-# class TransactionSerializer(serializers.HyperlinkedModelSerializer):# pylint: disable=R0903
-#     """Creating serialization for transaction"""
-#     sender = serializers.HyperlinkedRelatedField(view_name='wallet-detail', read_only=True)
-#     receiver = serializers.HyperlinkedRelatedField(view_name='wallet-detail', read_only=True)
-#
-#     class Meta:  # pylint: disable=R0903
-#         """Creating Meta class for transactions"""
-#         model = Transaction
-#         fields = ('id', 'sender', 'receiver', 'transfer_amount',
-#         'commission', 'status', 'timestamp')
-#         read_only_fields = ('sender', 'commission', 'status', 'timestamp')
+class TransactionSerializer(serializers.HyperlinkedModelSerializer):  # pylint: disable=R0903
+    """Creating serialization for transaction"""
+    sender = serializers.SlugRelatedField(slug_field='name', queryset=Wallet.objects.all())
+    receiver = serializers.SlugRelatedField(slug_field='name', queryset=Wallet.objects.all())
+    new_balance = serializers.SerializerMethodField()
+
+    class Meta:  # pylint: disable=R0903
+        """Creating Meta class for transactions"""
+        model = Transaction
+        fields = ['url', 'id', 'sender', 'receiver', 'transfer_amount',
+                  'commission', 'status', 'timestamp', 'new_balance']
+        read_only_fields = ('commission', 'status', 'timestamp')
+        excluded_fields = ('new_balance',)
+
+    def get_new_balance(self, sender, receiver, obj):
+        """Changing balance"""
+        receiver.balance += obj.transaction_amount
+        sender.balance -= obj.transaction_amount
+        receiver.save()
+        sender.save()
+        return sender, receiver
+
+    def create(self, validated_data):
+        """Creating transaction"""
+        sender_wallet = Wallet.objects.all(**validated_data)
+        receiver_wallet = Wallet.objects.all(**validated_data)
+        if sender_wallet.currency == receiver_wallet.currency:
+            self.get_new_balance(sender=sender_wallet,
+                                 receiver=receiver_wallet, obj=Transaction.objects.all())
+        else:
+            raise ValueError('You cannot transfer money between wallets with different currency.')

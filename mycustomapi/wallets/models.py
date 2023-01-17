@@ -25,18 +25,18 @@ class Wallet(models.Model):  # pylint: disable=R0903
                               on_delete=models.CASCADE, blank=False)
 
 
-# class Transaction(models.Model):  # pylint: disable=R0903
-#     """Creating Transaction model"""
-#     STATUS_CHOICES = (
-#         ('PAID', 'PAID'),
-#         ('FAILED', 'FAILED'),
-#     )
-#
-#     sender = models.ForeignKey(Wallet,
-#     related_name='name', on_delete=models.CASCADE, blank=False),
-#     receiver = models.ForeignKey(Wallet,
-#     related_name='name', on_delete=models.CASCADE, blank=False),
-#     transfer_amount = models.DecimalField(default=0)
-#     commission = models.FloatField(default=0)
-#     status = models.CharField(choices=STATUS_CHOICES, default='PAID')
-#     timestamp = models.DateTimeField(auto_now_add=True)
+class Transaction(models.Model):  # pylint: disable=R0903
+    """Creating Transaction model"""
+    STATUS_CHOICES = (
+        ('PAID', 'PAID'),
+        ('FAILED', 'FAILED'),
+    )
+
+    sender = models.ForeignKey(Wallet,
+                               related_name='sender', on_delete=models.CASCADE, blank=False)
+    receiver = models.ForeignKey(Wallet,
+                                 related_name='receiver', on_delete=models.CASCADE, blank=False)
+    transfer_amount = models.FloatField(default=0)
+    commission = models.FloatField(default=0)
+    status = models.CharField(choices=STATUS_CHOICES, default='PAID', max_length=100)
+    timestamp = models.DateTimeField(auto_now_add=True)
