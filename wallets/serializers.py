@@ -1,8 +1,9 @@
 # pylint: disable=import-error
 """Importing model and serializers"""
 from rest_framework import serializers
-from wallets.models import Wallet, Transaction
 from django.contrib.auth.models import User
+
+from wallets.models import Wallet, Transaction
 
 
 class WalletSerializer(serializers.ModelSerializer):  # pylint: disable=R0903

@@ -1,8 +1,9 @@
 # pylint: disable=import-error
 """Importing urls and views"""
 from django.urls import path, include
-from wallets import views
 from rest_framework.routers import DefaultRouter
+
+from wallets import views
 
 
 router = DefaultRouter()
