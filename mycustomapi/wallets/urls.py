@@ -1,12 +1,16 @@
+# pylint: disable=import-error
 """Importing urls and views"""
-from django.urls import path  # pylint: disable=E0401
-from wallets import views  # pylint: disable=E0401
+from django.urls import path, include
+from wallets import views
+from rest_framework.routers import DefaultRouter
+
+
+router = DefaultRouter()
+router.register(r'wallets', views.WalletsViewSet, basename='wallet-list')
+router.register(r'users', views.UserViewSet, basename='user')
+router.register(r'transactions', views.TransactionViewSet, basename='transaction')
+
 
 urlpatterns = [
-    path('', views.api_root),
-    path('register/', views.CreateUserView.as_view(), name='register'),
-    path('wallets/', views.WalletsList.as_view(), name='wallet-list'),
-    path('wallets/<int:pk>/', views.WalletName.as_view(), name='wallet-detail'),
-    path('users/', views.UserList.as_view(), name='user-list'),
-    path('users/<int:pk>/', views.UserDetail.as_view(), name='user-detail'),
+    path('', include(router.urls)),
 ]

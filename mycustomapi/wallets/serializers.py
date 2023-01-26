@@ -1,44 +1,31 @@
+# pylint: disable=import-error
 """Importing model and serializers"""
-from rest_framework import serializers  # pylint: disable=E0401
-from wallets.models import Wallet  # pylint: disable=E0401
-from django.contrib.auth.models import User  # pylint: disable=E0401
-from django.utils.crypto import get_random_string # pylint: disable=E0401
+from rest_framework import serializers
+from wallets.models import Wallet, Transaction
+from django.contrib.auth.models import User
 
 
-class WalletSerializer(serializers.HyperlinkedModelSerializer):  # pylint: disable=R0903
+class WalletSerializer(serializers.ModelSerializer):  # pylint: disable=R0903
     """Create serialization for Wallet model"""
     owner = serializers.ReadOnlyField(source='owner.username')
-
-    def create(self, validated_data):
-        """create wallet object"""
-        obj = Wallet.objects.create(**validated_data)
-        obj.name = get_random_string(length=8).upper()  # Name must consists of 8 symbols
-        if obj.currency == 'RUB':
-            obj.balance = format(100, '.2f')
-        else:
-            obj.balance = format(3, '.2f')
-        obj.save()
-        return obj
 
     class Meta:  # pylint: disable=R0903
         """Create Meta class for model"""
         model = Wallet
-        fields = ('url',
-                  'id',
+        fields = ['id',
                   'owner',
                   'name',
                   'type',
                   'currency',
                   'balance',
                   'created_on',
-                  'modified_on',)
-        write_only_fields = ('owner',)
-        read_only_fields = ('name', 'balance', 'created_on', 'modified_on',)
+                  'modified_on']
+        read_only_fields = ['name', 'balance', 'created_on', 'modified_on',]
 
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):  # pylint: disable=R0903
+class UserSerializer(serializers.ModelSerializer):  # pylint: disable=R0903
     """Create serialization for User model"""
-    wallets = serializers.HyperlinkedRelatedField(many=True, view_name='wallet-detail',
+    wallets = serializers.HyperlinkedRelatedField(many=True, view_name='wallet-name',
                                                   read_only=True)
     password = serializers.CharField(write_only=True)
 
@@ -48,10 +35,24 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):  # pylint: disable
             username=validated_data['username'],
             password=validated_data['password'],
         )
-
         return user
 
     class Meta:  # pylint: disable=R0903
         """Create Meta class for User model"""
         model = User
-        fields = ['url', 'id', 'username', 'password', 'wallets']
+        fields = ['id', 'username', 'password', 'wallets']
+
+
+class TransactionSerializer(serializers.ModelSerializer):  # pylint: disable=R0903
+    """Create serialization for transactions"""
+    class Meta:  # pylint: disable=R0903
+        """Create Meta class for Transaction model"""
+        model = Transaction
+        fields = ['id',
+                  'sender',
+                  'receiver',
+                  'transfer_amount',
+                  'commission',
+                  'status',
+                  'timestamp']
+        read_only_fields = ['commission', 'status']
