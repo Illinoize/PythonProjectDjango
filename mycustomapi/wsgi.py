@@ -1,5 +1,5 @@
 """
-WSGI config for mycustomapi project.
+WSGI config for testetst project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 

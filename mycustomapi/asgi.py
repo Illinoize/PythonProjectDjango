@@ -1,5 +1,5 @@
 """
-ASGI config for mycustomapi project.
+ASGI config for testetst project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 
