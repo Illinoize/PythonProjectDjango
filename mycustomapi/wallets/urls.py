@@ -7,7 +7,8 @@ from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
 router.register(r'wallets', views.WalletsViewSet, basename='wallet-list')
-router.register(r'users', views.UserList, basename='user')
+router.register(r'users', views.UserViewSet, basename='user')
+router.register(r'transactions', views.TransactionViewSet, basename='transaction')
 
 
 urlpatterns = [
