@@ -1,6 +1,8 @@
 # pylint: disable=import-error
 """Importing models"""
-from django.db import models
+import datetime
+
+from django.db import models, transaction
 from django.utils.crypto import get_random_string
 
 
@@ -36,6 +38,12 @@ class Wallet(models.Model):  # pylint: disable=R0903
             self.balance = format(3, '2f')  # 3.00 start balance for currency USD, EUR
         super().save(*args, **kwargs)
 
+    def update(self, balance, date):
+        """Updating wallet"""
+        self.balance = balance
+        self.modified_on = date
+        super().save()
+
 
 class Transaction(models.Model):  # pylint: disable=R0903
     """Creating Transaction model"""
@@ -53,30 +61,43 @@ class Transaction(models.Model):  # pylint: disable=R0903
     status = models.CharField(choices=STATUS_CHOICES, default='PAID', max_length=100)
     timestamp = models.DateTimeField(auto_now_add=True)
 
-    def check_balance(self, input_1, input_2):
+    def check_balance(self, sender, receiver, amount):
         """Checking balance and provide required action"""
-        if input_1.filter(id=self.pk) >= input_2.filter(id=self.pk):
-            input_1.balance.entry_set.remove(self.transfer_amount)
-            input_2.balance.entry_set.add(self.transfer_amount)
-            self.status = 'PAID'
+        if sender.balance >= amount:
+            with transaction.atomic():
+                sender.balance -= amount
+                sender.modified_on = datetime.datetime.now()
+                sender.update(balance=sender.balance, date=sender.modified_on)
+                receiver.balance += amount
+                receiver.modified_on = datetime.datetime.now()
+                receiver.update(balance=receiver.balance, date=receiver.modified_on)
+                self.status = 'PAID'
         else:
             self.status = 'FAILED'
+            raise Exception('You do not have enough money')
 
-    def check_currency(self, input_1, input_2):
+    def check_currency(self, sender, receiver, amount):
         """Checking whether wallets have the same currency"""
-        if input_1.filter(id=self.pk) == input_2.filter(id=self.pk):
-            self.check_balance(input_1, input_2)
+        if sender.currency == receiver.currency:
+            self.check_balance(sender, receiver, amount)
         else:
             self.status = 'FAILED'
+            raise Exception('You cannot transfer amount between wallet with different currencies')
+
+    def make_transaction(self):
+        """Make transaction"""
+        sender = self.sender
+        receiver = self.receiver
+        amount = self.transfer_amount
+        if sender.owner == receiver.owner:
+            self.check_currency(sender, receiver, amount)
+        else:
+            self.commission = 0.10
+            self.transfer_amount *= self.commission
+            amount = self.transfer_amount
+            self.check_currency(sender, receiver, amount)
 
     def save(self, *args, **kwargs):
         """Creating transaction"""
-        sender = Transaction.objects.select_related('sender')
-        receiver = Transaction.objects.select_related('receiver')
-        if sender.filter(sender=self.pk) == receiver.filter(receiver=self.pk):
-            self.check_currency(sender, receiver)
-        else:
-            self.commission = 0.10  # commission for transaction between different owners
-            self.transfer_amount *= self.commission
-            self.check_currency(sender, receiver)
+        self.make_transaction()
         super().save(*args, **kwargs)
