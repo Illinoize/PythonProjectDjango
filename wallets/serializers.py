@@ -1,6 +1,7 @@
 # pylint: disable=import-error
 """Importing model and serializers"""
 from rest_framework import serializers
+
 from django.contrib.auth.models import User
 
 from wallets.models import Wallet, Transaction
@@ -23,13 +24,6 @@ class WalletSerializer(serializers.ModelSerializer):  # pylint: disable=R0903
                   'modified_on']
         read_only_fields = ['name', 'balance', 'created_on', 'modified_on']
 
-    def update(self, instance, validated_data):
-        """Update Wallet serializer"""
-        instance.balance = validated_data.get('balance', instance.email)
-        instance.modified_on = validated_data.get('modified_on', instance.content)
-        instance.save()
-        return instance
-
 
 class UserSerializer(serializers.ModelSerializer):  # pylint: disable=R0903
     """Create serialization for User model"""
@@ -47,6 +41,7 @@ class UserSerializer(serializers.ModelSerializer):  # pylint: disable=R0903
         """Create Meta class for User model"""
         model = User
         fields = ['id', 'username', 'password', 'wallets']
+        read_only_fields = ['wallets']
 
 
 class TransactionSerializer(serializers.ModelSerializer):  # pylint: disable=R0903

@@ -1,4 +1,4 @@
-# pylint: disable=import-error
+# pylint: disable=import-error  disable=line-too-long  disable=consider-using-f-string
 """Importing models"""
 import datetime
 
@@ -22,26 +22,31 @@ class Wallet(models.Model):  # pylint: disable=R0903
     type = models.CharField(choices=CARD_CHOICE, max_length=100, default='Visa')
     currency = models.CharField(choices=CURRENCY_CHOICE, max_length=100, default='USD')
     balance = models.FloatField(default=0)
-    created_on = models.DateTimeField(auto_now=True)
+    created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now_add=True)
     owner = models.ForeignKey('auth.User', related_name='wallets',
                               on_delete=models.CASCADE, blank=False)
 
     def save(self, *args, **kwargs):
         """Creating wallet"""
-        if Wallet.objects.count() > 4:
+        if Wallet.objects.filter(owner=self.owner).count() > 4:
             raise Exception('You have maximum wallets')
         self.name = get_random_string(length=8).upper()  # Name must consists of 8 symbols
         if self.currency == 'RUB':
-            self.balance = format(100, '2f')  # 100.00 start balance for currency RUB
+            self.balance = 100  # 100.00 start balance for currency RUB
+            self.balance = float('{:.2f}'.format(self.balance))  # Balance should be rounded up to 2 decimals
         else:
-            self.balance = format(3, '2f')  # 3.00 start balance for currency USD, EUR
+            self.balance = 3  # 3.00 start balance for currency USD, EUR
+            self.balance = float('{:.2f}'.format(self.balance))  # Balance should be rounded up to 2 decimals
+        self.created_on = datetime.datetime.now()
+        self.modified_on = datetime.datetime.now()
         super().save(*args, **kwargs)
 
-    def update(self, balance, date):
+    def update(self, balance):
         """Updating wallet"""
         self.balance = balance
-        self.modified_on = date
+        self.balance = float('{:.2f}'.format(self.balance))  # Balance should be rounded up to 2 decimals
+        self.modified_on = datetime.datetime.now()
         super().save()
 
 
@@ -61,20 +66,18 @@ class Transaction(models.Model):  # pylint: disable=R0903
     status = models.CharField(choices=STATUS_CHOICES, default='PAID', max_length=100)
     timestamp = models.DateTimeField(auto_now_add=True)
 
-    def check_balance(self, sender, receiver, amount):
-        """Checking balance and provide required action"""
-        if sender.balance >= amount:
-            with transaction.atomic():
-                sender.balance -= amount
-                sender.modified_on = datetime.datetime.now()
-                sender.update(balance=sender.balance, date=sender.modified_on)
-                receiver.balance += amount
-                receiver.modified_on = datetime.datetime.now()
-                receiver.update(balance=receiver.balance, date=receiver.modified_on)
-                self.status = 'PAID'
+    def make_transaction(self):
+        """Make transaction"""
+        sender = self.sender
+        receiver = self.receiver
+        amount = self.transfer_amount
+        if sender.owner == receiver.owner:
+            self.check_currency(sender, receiver, amount)
         else:
-            self.status = 'FAILED'
-            raise Exception('You do not have enough money')
+            self.commission = self.transfer_amount * 0.10  # If you send money to another user, you pay fixed commission
+            self.transfer_amount -= self.commission
+            amount = self.transfer_amount
+            self.check_currency(sender, receiver, amount)
 
     def check_currency(self, sender, receiver, amount):
         """Checking whether wallets have the same currency"""
@@ -84,20 +87,21 @@ class Transaction(models.Model):  # pylint: disable=R0903
             self.status = 'FAILED'
             raise Exception('You cannot transfer amount between wallet with different currencies')
 
-    def make_transaction(self):
-        """Make transaction"""
-        sender = self.sender
-        receiver = self.receiver
-        amount = self.transfer_amount
-        if sender.owner == receiver.owner:
-            self.check_currency(sender, receiver, amount)
+    def check_balance(self, sender, receiver, amount):
+        """Checking balance and provide required action"""
+        if sender.balance >= amount:
+            with transaction.atomic():
+                sender.balance -= amount
+                sender.update(balance=sender.balance)
+                receiver.balance += amount
+                receiver.update(balance=receiver.balance)
+                self.status = 'PAID'
         else:
-            self.commission = 0.10
-            self.transfer_amount *= self.commission
-            amount = self.transfer_amount
-            self.check_currency(sender, receiver, amount)
+            self.status = 'FAILED'
+            raise Exception('You do not have enough money')
 
     def save(self, *args, **kwargs):
         """Creating transaction"""
         self.make_transaction()
+        self.timestamp = datetime.datetime.now()
         super().save(*args, **kwargs)

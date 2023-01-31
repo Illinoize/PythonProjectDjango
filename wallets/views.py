@@ -3,6 +3,7 @@
 from rest_framework import mixins
 from rest_framework import permissions
 from rest_framework import viewsets
+
 from django.contrib.auth.models import User
 
 from wallets.models import Wallet, Transaction
@@ -25,8 +26,14 @@ class WalletsViewSet(viewsets.GenericViewSet,  # pylint: disable=R0903
         """Adding owner field for instances"""
         serializer.save(owner=self.request.user)
 
+    def get_queryset(self):
+        """Get the list for authorized user"""
+        user = self.request.user
+        return Wallet.objects.filter(owner=user)
 
-class UserViewSet(viewsets.ReadOnlyModelViewSet):  # pylint: disable=R0903
+
+class UserViewSet(viewsets.ReadOnlyModelViewSet,  # pylint: disable=R0903
+                  mixins.CreateModelMixin):
     """Creating user list"""
     queryset = User.objects.all()
     serializer_class = UserSerializer
