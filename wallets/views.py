@@ -27,7 +27,7 @@ class WalletsViewSet(viewsets.GenericViewSet,  # pylint: disable=R0903
         serializer.save(owner=self.request.user)
 
     def get_queryset(self):
-        """Get the list for authorized user"""
+        """Get the list for authorised user"""
         user = self.request.user
         return Wallet.objects.filter(owner=user)
 
@@ -42,8 +42,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet,  # pylint: disable=R0903
 class TransactionViewSet(viewsets.GenericViewSet,  # pylint: disable=R0903
                          mixins.CreateModelMixin,
                          mixins.ListModelMixin,
-                         mixins.RetrieveModelMixin,
-                         mixins.DestroyModelMixin):
+                         mixins.RetrieveModelMixin):
     """Creating/Receiving a transaction"""
     queryset = Transaction.objects.all()
     serializer_class = TransactionSerializer

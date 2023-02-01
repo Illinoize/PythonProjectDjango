@@ -67,7 +67,7 @@ class Transaction(models.Model):  # pylint: disable=R0903
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def make_transaction(self):
-        """Make transaction"""
+        """Preparing info for transaction and checking users"""
         sender = self.sender
         receiver = self.receiver
         amount = self.transfer_amount
@@ -85,7 +85,7 @@ class Transaction(models.Model):  # pylint: disable=R0903
             self.check_balance(sender, receiver, amount)
         else:
             self.status = 'FAILED'
-            raise Exception('You cannot transfer amount between wallet with different currencies')
+            raise Exception('You cannot transfer amount between wallets with different currencies')
 
     def check_balance(self, sender, receiver, amount):
         """Checking balance and provide required action"""
