@@ -9,9 +9,9 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
-
+# pylint: disable=E0611
 # mypy: ignore-errors
-
+from os import environ
 
 from pathlib import Path
 
@@ -82,11 +82,11 @@ WSGI_APPLICATION = 'mycustomapi.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'db_pos1',
-        'USER': 'postgres',
-        'PASSWORD': 'postgres',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': environ.get('POSTGRES_DB', default='db_pos1'),
+        'USER': environ.get('POSTGRES_USER', default='postgres'),
+        'PASSWORD': environ.get('POSTGRES_PASSWORD', default='postgres'),
+        'HOST': environ.get('POSTGRES_HOST', default='localhost'),
+        'PORT': "5432"
     }
 }
 

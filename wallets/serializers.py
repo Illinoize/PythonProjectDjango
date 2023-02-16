@@ -46,6 +46,7 @@ class UserSerializer(serializers.ModelSerializer):  # pylint: disable=R0903
 
 class TransactionSerializer(serializers.ModelSerializer):  # pylint: disable=R0903
     """Create serialization for transactions"""
+
     sender = serializers.SlugRelatedField(queryset=Wallet.objects.all(), slug_field='name')
     receiver = serializers.SlugRelatedField(queryset=Wallet.objects.all(), slug_field='name')
 

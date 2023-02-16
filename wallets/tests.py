@@ -4,7 +4,6 @@ import pytest
 
 from django.contrib.auth.models import User
 
-
 pytestmark = pytest.mark.django_db
 
 

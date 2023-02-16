@@ -42,7 +42,7 @@ class Wallet(models.Model):  # pylint: disable=R0903
         self.modified_on = datetime.datetime.now()
         super().save(*args, **kwargs)
 
-    def update(self, balance):
+    def update(self, balance: int):
         """Updating wallet"""
         self.balance = balance
         self.balance = float('{:.2f}'.format(self.balance))  # Balance should be rounded up to 2 decimals
@@ -56,6 +56,7 @@ class Transaction(models.Model):  # pylint: disable=R0903
         ('PAID', 'PAID'),
         ('FAILED', 'FAILED'),
     )
+    COMMISSION = 0.10
 
     sender = models.ForeignKey(Wallet,
                                related_name='sender', on_delete=models.CASCADE, blank=False)
@@ -70,30 +71,33 @@ class Transaction(models.Model):  # pylint: disable=R0903
         """Preparing info for transaction and checking users"""
         sender = self.sender
         receiver = self.receiver
-        amount = self.transfer_amount
         if sender.owner == receiver.owner:
-            self.check_currency(sender, receiver, amount)
+            self.check_currency(sender, receiver)
         else:
-            self.commission = self.transfer_amount * 0.10  # If you send money to another user, you pay fixed commission
-            self.transfer_amount -= self.commission
-            amount = self.transfer_amount
-            self.check_currency(sender, receiver, amount)
+            self.change_commission()
+            self.check_currency(sender, receiver)
 
-    def check_currency(self, sender, receiver, amount):
+    def change_commission(self):
+        """Changing commission for transactions between different users"""
+        self.commission = self.transfer_amount * self.COMMISSION
+        # If you send money to another user, you pay fixed commission
+        self.commission = float('{:.2f}'.format(self.commission))
+
+    def check_currency(self, sender: Wallet, receiver: Wallet):
         """Checking whether wallets have the same currency"""
         if sender.currency == receiver.currency:
-            self.check_balance(sender, receiver, amount)
+            self.check_balance(sender, receiver)
         else:
             self.status = 'FAILED'
             raise Exception('You cannot transfer amount between wallets with different currencies')
 
-    def check_balance(self, sender, receiver, amount):
+    def check_balance(self, sender: Wallet, receiver: Wallet):
         """Checking balance and provide required action"""
-        if sender.balance >= amount:
+        if sender.balance >= self.transfer_amount:
             with transaction.atomic():
-                sender.balance -= amount
+                sender.balance -= (self.transfer_amount + self.commission)
                 sender.update(balance=sender.balance)
-                receiver.balance += amount
+                receiver.balance += self.transfer_amount
                 receiver.update(balance=receiver.balance)
                 self.status = 'PAID'
         else:

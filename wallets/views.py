@@ -5,6 +5,7 @@ from rest_framework import permissions
 from rest_framework import viewsets
 
 from django.contrib.auth.models import User
+from django.db.models import Q
 
 from wallets.models import Wallet, Transaction
 from wallets.serializers import WalletSerializer, UserSerializer, TransactionSerializer
@@ -47,3 +48,8 @@ class TransactionViewSet(viewsets.GenericViewSet,  # pylint: disable=R0903
     queryset = Transaction.objects.all()
     serializer_class = TransactionSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_queryset(self):
+        """Get user transactions"""
+        user = self.request.user
+        return Transaction.objects.filter(Q(sender__owner=user) | Q(receiver__owner=user))

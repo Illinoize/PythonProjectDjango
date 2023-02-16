@@ -9,9 +9,12 @@ from wallets import views
 router = DefaultRouter()
 router.register(r'wallets', views.WalletsViewSet, basename='wallet-list')
 router.register(r'users', views.UserViewSet, basename='user')
-router.register(r'transactions', views.TransactionViewSet, basename='transaction')
+# router.register(r'transactions', views.TransactionViewSet, basename='transaction')
 
 
 urlpatterns = [
+    path(r'wallets/transactions',
+         views.TransactionViewSet.as_view({'post': 'create', 'get': 'list'})),
+    path(r'wallets/transactions/<int:pk>', views.TransactionViewSet.as_view({'get': 'retrieve'})),
     path('', include(router.urls)),
 ]
