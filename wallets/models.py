@@ -30,7 +30,7 @@ class Wallet(models.Model):  # pylint: disable=R0903
     def save(self, *args, **kwargs):
         """Creating wallet"""
         if Wallet.objects.filter(owner=self.owner).count() > 4:
-            raise Exception('You have maximum wallets')
+            raise ValueError('You have maximum wallets')
         self.name = get_random_string(length=8).upper()  # Name must consists of 8 symbols
         if self.currency == 'RUB':
             self.balance = 100  # 100.00 start balance for currency RUB
@@ -89,7 +89,7 @@ class Transaction(models.Model):  # pylint: disable=R0903
             self.check_balance(sender, receiver)
         else:
             self.status = 'FAILED'
-            raise Exception('You cannot transfer amount between wallets with different currencies')
+            raise ValueError('You cannot transfer amount between wallets with different currencies')
 
     def check_balance(self, sender: Wallet, receiver: Wallet):
         """Checking balance and provide required action"""
@@ -102,7 +102,7 @@ class Transaction(models.Model):  # pylint: disable=R0903
                 self.status = 'PAID'
         else:
             self.status = 'FAILED'
-            raise Exception('You do not have enough money')
+            raise ValueError('You do not have enough money')
 
     def save(self, *args, **kwargs):
         """Creating transaction"""
