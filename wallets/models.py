@@ -49,6 +49,9 @@ class Wallet(models.Model):  # pylint: disable=R0903
         self.modified_on = datetime.datetime.now()
         super().save()
 
+    def __str__(self):
+        return "%s: %s, %s" % (self.owner, self.name, self.currency)
+
 
 class Transaction(models.Model):  # pylint: disable=R0903
     """Creating Transaction model"""
@@ -56,14 +59,13 @@ class Transaction(models.Model):  # pylint: disable=R0903
         ('PAID', 'PAID'),
         ('FAILED', 'FAILED'),
     )
-    COMMISSION = 0.10
 
     sender = models.ForeignKey(Wallet,
                                related_name='sender', on_delete=models.CASCADE, blank=False)
     receiver = models.ForeignKey(Wallet,
                                  related_name='receiver', on_delete=models.CASCADE, blank=False)
     transfer_amount = models.FloatField(default=0)
-    commission = models.FloatField(default=0)
+    commission = models.FloatField(default=0)  # default commission for one user is 0
     status = models.CharField(choices=STATUS_CHOICES, default='PAID', max_length=100)
     timestamp = models.DateTimeField(auto_now_add=True)
 
@@ -79,7 +81,7 @@ class Transaction(models.Model):  # pylint: disable=R0903
 
     def change_commission(self):
         """Changing commission for transactions between different users"""
-        self.commission = self.transfer_amount * self.COMMISSION
+        self.commission = self.transfer_amount * 0.10
         # If you send money to another user, you pay fixed commission
         self.commission = float('{:.2f}'.format(self.commission))
 

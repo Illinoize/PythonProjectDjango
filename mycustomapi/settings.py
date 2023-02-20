@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 # pylint: disable=E0611
 # mypy: ignore-errors
-from os import environ
 
 from pathlib import Path
 
@@ -28,7 +27,7 @@ SECRET_KEY = 'django-insecure-@ijgu-_fl)1&yu0h4&qdo*sh%&^14xrm)lnhphs9+*qtfnsauj
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '0.0.0.0', 'postgres', '127.0.0.1']
 
 
 # Application definition
@@ -82,10 +81,10 @@ WSGI_APPLICATION = 'mycustomapi.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': environ.get('POSTGRES_DB', default='db_pos1'),
-        'USER': environ.get('POSTGRES_USER', default='postgres'),
-        'PASSWORD': environ.get('POSTGRES_PASSWORD', default='postgres'),
-        'HOST': environ.get('POSTGRES_HOST', default='localhost'),
+        'NAME': 'test_database',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'HOST': 'postgres',
         'PORT': "5432"
     }
 }
