@@ -30,7 +30,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['localhost', '0.0.0.0', 'postgres', '127.0.0.1']
 
@@ -86,10 +86,10 @@ WSGI_APPLICATION = 'mycustomapi.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'db_pos1',  #test_database
+        'NAME': 'test_database',
         'USER': 'postgres',
         'PASSWORD': 'postgres',
-        'HOST': 'localhost',  # postgres
+        'HOST': 'postgres',
         'PORT': "5432"
     }
 }
