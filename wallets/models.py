@@ -77,7 +77,7 @@ class Transaction(models.Model):  # pylint: disable=R0903
 
     def change_commission(self):
         """Changing commission for transactions between different users"""
-        self.commission = round(self.transfer_amount * 0.10, 2)
+        self.commission = self.transfer_amount * 0.10
         # If you send money to another user, you pay fixed commission
 
     def check_currency(self, sender: Wallet, receiver: Wallet):

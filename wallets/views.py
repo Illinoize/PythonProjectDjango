@@ -65,6 +65,6 @@ class TransactionViewSet(viewsets.GenericViewSet,  # pylint: disable=R0903
             headers = self.get_success_headers(serializer.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
         except ValueError:
-            return Response("You do not have enough money or try to change money "
-                            "between wallets with different currency",
+            return Response("HTTP 406 NOT ACCEPTABLE: Seems like you have chosen wallet "
+                            "with another currency or you do not have enough money",
                             status=status.HTTP_406_NOT_ACCEPTABLE)
