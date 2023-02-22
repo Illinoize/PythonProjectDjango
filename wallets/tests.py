@@ -58,16 +58,16 @@ class TestTransaction:
         # Creating a wallet for user2
         user2 = User.objects.get(username="user2")
         client.force_authenticate(user=user2)
-        wallet2 = client.post("/wallets/", dict(type="Mastercard", currency="USD"))
+        wallet2 = client.post("/wallets/", {"type": "Mastercard", "currency": "USD"})
 
         # Checking whether both wallets were created
         assert wallet1.status_code == 201
         assert wallet2.status_code == 201
 
         # Creating a transaction
-        transaction = client.post("/transactions/", dict(sender=wallet2.data["name"],
-                                                         receiver=wallet1.data["name"],
-                                                         transfer_amount=1))
+        transaction = client.post("/transactions/", {"sender": wallet2.data["name"],
+                                                     "receiver": wallet1.data["name"],
+                                                     "transfer_amount": 1})
 
         data = transaction.data
 
